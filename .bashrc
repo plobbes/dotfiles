@@ -5,15 +5,23 @@
 [ -f ~/__DEBUG ] && DEBUG=1 || DEBUG=0
 [ "$DEBUG" = 1 ] && echo "DEBUG: in .bashrc"
 
-# Allow global definitions
-hostrc="/etc/bashrc"
-if [ -f "$hostrc" ]; then
-    [ "$DEBUG" = 1 ] && echo "DEBUG: trying $hostrc"
-    . "$hostrc"
-fi
+_source()
+{
+    file="$1"
+    if [ -f "$file" ]; then
+        [ "$DEBUG" = 1 ] && echo "DEBUG: sourcing $file" && . "$file"
+    else
+        [ "$DEBUG" = 1 ] && echo "DEBUG: no $file"
+    fi
+}
+
+# Get vendor supplied aliases, functions, etc.
+_source ~/.bashrc.vendor
 
 # Customize even with common NFS home on the basis of:
 #   1 common/generic, 2 per-site, 3 per-host
+# could also include:
+# - /etc/bashrc /etc/bash.bashrc /etc/bash_completion
 host="`/bin/uname -n`"
 cust=~/__NOCUSTOM
 if [ -z "$PS1" ]; then
@@ -21,12 +29,7 @@ if [ -z "$PS1" ]; then
 elif [ ! -f "$ncust" -a ! -f "$ncust"."$host" ]; then
     base=~/.bashrc.custom
     for ext in "" ".site" ".$host"; do
-        file="$base""$ext"
-        if [ -f "$file" ]; then
-            [ "$DEBUG" = 1 ] && echo "DEBUG: trying $file" && . "$file"
-        else
-            [ "$DEBUG" = 1 ] && echo "DEBUG: no $file"
-        fi
+        _source "$base""$ext"
     done
 else
     [ "$DEBUG" = 1 ] && echo "DEBUG: matched a $cust{,.$host} file"
