@@ -3,17 +3,19 @@
 #   ~/__DEBUG :: be more verbose
 #   ~/__NOCUSTOM{.host} :: do not process .custom* files
 [ -f ~/__DEBUG ] && DEBUG=1 || DEBUG=0
-[ "$DEBUG" = 1 ] && echo "DEBUG: in .bashrc"
 
+_debug() { [ "$DEBUG" = 1 ] && echo "DEBUG: $@"; }
 _source()
 {
     file="$1"
     if [ -f "$file" ]; then
-        [ "$DEBUG" = 1 ] && echo "DEBUG: sourcing $file" && . "$file"
+        _debug "sourcing $file"; . "$file"
     else
-        [ "$DEBUG" = 1 ] && echo "DEBUG: no $file"
+        _debug "no $file"
     fi
 }
+
+_debug "in .bashrc"
 
 # Get vendor supplied aliases, functions, etc.
 _source ~/.bashrc.vendor
@@ -25,12 +27,12 @@ _source ~/.bashrc.vendor
 host="`/bin/uname -n`"
 cust=~/__NOCUSTOM
 if [ -z "$PS1" ]; then
-    [ "$DEBUG" = 1 ] && echo "DEBUG: skip .bashrc.custom*: not interactive"
+    _debug "skip .bashrc.custom*: not interactive"
 elif [ ! -f "$ncust" -a ! -f "$ncust"."$host" ]; then
     base=~/.bashrc.custom
     for ext in "" ".site" ".$host"; do
         _source "$base""$ext"
     done
 else
-    [ "$DEBUG" = 1 ] && echo "DEBUG: matched a $cust{,.$host} file"
+    _debug "matched a $cust{,.$host} file"
 fi

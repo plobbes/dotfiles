@@ -3,17 +3,19 @@
 #   ~/__DEBUG :: be more verbose
 #   ~/__NOCUSTOM{.host} :: do not process .custom* files
 [ -f ~/__DEBUG ] && DEBUG=1 || DEBUG=0
-[ "$DEBUG" = 1 ] && echo "DEBUG: in .bash_profile"
 
+_debug() { [ "$DEBUG" = 1 ] && echo "DEBUG: $@"; }
 _source()
 {
     file="$1"
     if [ -f "$file" ]; then
-        [ "$DEBUG" = 1 ] && echo "DEBUG: sourcing $file" && . "$file"
+        _debug "sourcing $file"; . "$file"
     else
-        [ "$DEBUG" = 1 ] && echo "DEBUG: no $file"
+        _debug "no $file"
     fi
 }
+
+_debug "in .bash_profile"
 
 # Get aliases, functions, etc.
 _source ~/.bashrc
@@ -30,5 +32,5 @@ if [ ! -f "$ncust" -a ! -f "$ncust"."$host" ]; then
         _source "$base""$ext"
     done
 else
-    [ "$DEBUG" = 1 ] && echo "DEBUG: matched a $cust{,.$host} file"
+    _debug "matched a $cust{,.$host} file"
 fi
